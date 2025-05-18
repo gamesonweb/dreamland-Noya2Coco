@@ -525,7 +525,7 @@ class SpaceBattleGame {
 }
 
 if (typeof Bullet.worker === 'undefined') {
-    Bullet.worker = new Worker(new URL('./bullet/worker.js', import.meta.url));
+    Bullet.worker = new Worker(new URL('./physicalObjects/bullet/worker.js', import.meta.url));
 }
 
 if (typeof Particle.worker === 'undefined') {
