@@ -13,8 +13,9 @@ import { VelocityVector } from './ui/velocityVector.js';
 
 class SpaceBattleGame {
     constructor() {
-        const host = location.hostname; // Dynamically determine the host
-        this.socket = new WebSocket(`ws://${host}:22220`); // Connect to WebSocket server
+        const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+		const port = location.protocol === 'https:' ? '' : ':22220';
+		this.socket = new WebSocket(`${protocol}://${location.hostname}${port}`);
         this.socket.sendMessage = this.sendMessage.bind(this); // Bind sendMessage method
         this.ships = {};
         this.playerShip = null;
