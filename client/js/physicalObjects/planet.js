@@ -7,25 +7,41 @@ import {
 import sunTextureUrl from '/images/sun.jpg';
 import flareTextureUrl from '/images/flare.jpg';
 
+// Imports des textures de planètes
+import planet1Albedo from '/images/planets/planet_1/Color.jpg';
+import planet1Normal from '/images/planets/planet_1/NormalGL.jpg';
+import planet1Parallax from '/images/planets/planet_1/Displacement.jpg';
+import planet1Roughness from '/images/planets/planet_1/Roughness.jpg';
+
+import planet2Albedo from '/images/planets/planet_2/Color.jpg';
+import planet2Normal from '/images/planets/planet_2/NormalGL.jpg';
+import planet2Parallax from '/images/planets/planet_2/Displacement.jpg';
+import planet2Roughness from '/images/planets/planet_2/Roughness.jpg';
+
+import planet3Albedo from '/images/planets/planet_3/Color.jpg';
+import planet3Normal from '/images/planets/planet_3/NormalGL.jpg';
+import planet3Parallax from '/images/planets/planet_3/Displacement.jpg';
+import planet3Roughness from '/images/planets/planet_3/Roughness.jpg';
+
 // Textures de planètes
 const textureSets = [
     {
-        albedo: '/images/planets/planet_1/Color.jpg',
-        normal: '/images/planets/planet_1/NormalGL.jpg',
-        parallax: '/images/planets/planet_1/Displacement.jpg',
-        roughness: '/images/planets/planet_1/Roughness.jpg',
+        albedo: planet1Albedo,
+        normal: planet1Normal,
+        parallax: planet1Parallax,
+        roughness: planet1Roughness,
     },
     {
-        albedo: '/images/planets/planet_2/Color.jpg',
-        normal: '/images/planets/planet_2/NormalGL.jpg',
-        parallax: '/images/planets/planet_2/Displacement.jpg',
-        roughness: '/images/planets/planet_2/Roughness.jpg',
+        albedo: planet2Albedo,
+        normal: planet2Normal,
+        parallax: planet2Parallax,
+        roughness: planet2Roughness,
     },
     {
-        albedo: '/images/planets/planet_3/Color.jpg',
-        normal: '/images/planets/planet_3/NormalGL.jpg',
-        parallax: '/images/planets/planet_3/Displacement.jpg',
-        roughness: '/images/planets/planet_3/Roughness.jpg',
+        albedo: planet3Albedo,
+        normal: planet3Normal,
+        parallax: planet3Parallax,
+        roughness: planet3Roughness,
     },
 ];
 
