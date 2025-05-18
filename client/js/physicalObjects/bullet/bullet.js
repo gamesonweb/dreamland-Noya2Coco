@@ -1,4 +1,4 @@
-import { Vector3, MeshBuilder, StandardMaterial, Color3, Quaternion, Sound } from '@babylonjs/core';
+import { Vector3, MeshBuilder, StandardMaterial, Color3, Quaternion, Sound, GlowLayer } from '@babylonjs/core';
 import { game } from '../../client.js';
 
 export class Bullet {
@@ -21,7 +21,7 @@ export class Bullet {
 
         // Add glow effect
         if (!scene.glowLayer) {
-            scene.glowLayer = new BABYLON.GlowLayer("glow", this.scene);
+            scene.glowLayer = new GlowLayer("glow", this.scene);
             scene.glowLayer.intensity = 5;
         }
         scene.glowLayer.addIncludedOnlyMesh(this.mesh);

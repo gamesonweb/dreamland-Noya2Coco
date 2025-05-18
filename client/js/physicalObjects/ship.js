@@ -1,6 +1,7 @@
 import { MeshBuilder, Texture, StandardMaterial, Color3, Quaternion, Vector3, PointLight, HemisphericLight } from '@babylonjs/core';
 import { VelocityVector } from '../ui/velocityVector.js';
 import { createMeshAxis } from '../ui/axis.js';
+import shipTexture from '/images/ship.png';
 
 export class Ship {
     constructor(scene, id, data, isPlayer = false) {
@@ -27,7 +28,7 @@ export class Ship {
 
         // Configure the ship material
         const shipMaterial = new StandardMaterial('shipMaterial', this.scene);
-        shipMaterial.diffuseTexture = new Texture("../../images/ship.png", scene);
+        shipMaterial.diffuseTexture = new Texture(shipTexture, scene);
         shipMaterial.diffuseColor = new Color3(0.8, 0.8, 0.8);
         shipMaterial.emissiveColor = new Color3(0.8, 0.8, 0.8);
         shipMaterial.specularColor = new Color3(0.2, 0.2, 0.2);

@@ -1,4 +1,5 @@
 import { MeshBuilder, StandardMaterial, Texture, Color3 } from "@babylonjs/core";
+import skydomeTexture from "/images/skydome.jpg";
 
 export class Skydome {
     constructor(scene) {
@@ -12,7 +13,7 @@ export class Skydome {
         skydomeMaterial.backFaceCulling = false;
 
         // Load and apply the skydome texture
-        const texture = new Texture("../../images/skydome.jpg", this.scene);
+        const texture = new Texture(skydomeTexture, this.scene);
         skydomeMaterial.diffuseTexture = texture;
         skydomeMaterial.emissiveColor = new Color3(0.5, 0.5, 0.5); // Dim the brightness
 
