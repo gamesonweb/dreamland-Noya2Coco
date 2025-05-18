@@ -1,7 +1,7 @@
 import { ParticleSys } from './particleSys.js';
 import { ParticleLight } from './particleLight.js';
 import { game } from '../../client.js';
-import { Vector3 } from 'babylonjs/core';
+import { Vector3 } from '@babylonjs/core';
 
 /** Manages a particle effect attached to an object */
 export class Particle {
