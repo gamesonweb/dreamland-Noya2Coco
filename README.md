@@ -1,5 +1,7 @@
 # Starfall - Jeu Spatial Multijoueur en Ligne 🚀
 
+### Participant : **Noah Rousseau**
+
 **Starfall** est un jeu multijoueur en 3D temps réel dans l'espace, développé en JavaScript avec Babylon.js. Il propose des combats de vaisseaux fluides, un système de gravité dynamique, et une interface immersive.
 
 ---
@@ -13,15 +15,14 @@ Dans *Starfall*, chaque joueur pilote un vaisseau spatial dans une arène galact
 ## 🚀 Fonctionnalités
 
 - **Multijoueur en ligne** : chaque joueur a son propre vaisseau connecté via WebSocket.
-- **Gravité réaliste** : influence des planètes et des étoiles sur les déplacements.
-- **Modes de vue dynamiques** :
-  - `V` : basculer entre vue cockpit et troisième personne
-- **Contrôles Clavier/Souris** :
+- **Gravité réaliste** : influence des planètes et des étoiles sur les déplacements. Attention, ne vous approchez pas trop des étoiles 😉 !
+- **Contrôles Clavier/Souris (Azerty et Qwerty)** :
   - `E` : accélérer (ajout de particules d’échappement)
   - `Espace` : tirer
   - `X` : afficher/masquer les axes & vecteurs
   - `I` : ouvrir l'inspecteur Babylon.js
-  - **Souris** : rotation libre du vaisseau (mode immersif)
+  - `V` : basculer entre vue cockpit et troisième personne
+  - `Souris` : rotation libre du vaisseau (mode immersif)
 - **Radar** : vision stratégique des vaisseaux ennemis autour de vous
 - **Effets spéciaux** :
   - Particules dynamiques
@@ -81,31 +82,45 @@ Dans *Starfall*, chaque joueur pilote un vaisseau spatial dans une arène galact
 │   │   ├── ship.js                 # Vaisseaux
 │   │   └── skydome.js              # Dôme du monde
 │   ├── ui/
-│   │   ├── axis.js           # Axes visuels
-│   │   ├── panel.js          # Interface d'information
-│   │   ├── utils.js          # Utilitaires de l'interface
-│   │   └── velocityVector.js # Vecteur de vitesse
-│   ├── client.js             # Initialisation du jeu côté client
+│   │   ├── axis.js                 # Axes visuels
+│   │   ├── panel.js                # Interface d'information
+│   │   ├── utils.js                # Utilitaires de l'interface
+│   │   └── velocityVector.js       # Vecteur de vitesse
+│   ├── client.js                   # Initialisation du jeu côté client
 └── server/
     ├── physicalObjects/
-    │   ├── bullet.js           # Projectiles 
-    │   ├── particle.js         # Particules 
+    │   ├── bullet.js               # Projectiles 
+    │   ├── particle.js             # Particules 
     │   ├── planet.js               # Planètes et étoiles
     │   └── ship.js                 # Vaisseaux
-    ├── game.js               # Logique de jeu (WebSocket)
-    └── server.js             # Serveur HTTP + WebSocket
+    ├── game.js                     # Logique de jeu (WebSocket)
+    └── server.js                   # Serveur HTTP + WebSocket
 ```
 
 ---
 
 ## 🎮 Comment Jouer
 
-1. Lancer le serveur :
+### Option 1 :
+Accédez à https://starfall.onrender.com pour jouer au jeu avec le monde entier !
+
+### Option 2 :
+1. Copiez de dépot :
+  ```bash
+  git clone https://github.com/gamesonweb/dreamland-Noya2Coco
+  ```
+
+2. Déplacez-vous dans le dossier `dreamland-Noya2Coco` et installez les dépendances :
+  ```bash
+  npm install
+  ```
+
+3. Lancez le serveur :
    ```bash
    npm run dev
    ```
 
-2. Ouvrir `http://localhost:5173` dans un navigateur.
+4. Ouvrez `http://localhost:5173` dans un navigateur.
 
 3. Cliquez sur **Jouer**.
 

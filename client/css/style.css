@@ -14,6 +14,7 @@ canvas {
   left: 0;
   width: 100%;
   height: 100%;
+  z-index: 1; /* Ensure canvas is below other elements */
 }
 
 #infoPanel {
@@ -25,6 +26,7 @@ canvas {
   padding: 10px;
   border-radius: 5px;
   font-family: Arial, sans-serif;
+  z-index: 7;
 }
 
 #axesIndicator {
@@ -38,6 +40,7 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 7;
 }
 
 #fpsPanel {
@@ -46,20 +49,22 @@ canvas {
   left: 10px;
   color: white;
   background-color: rgba(0, 0, 0, 0.5);
-  padding: 10px;
+  padding: 10px 50px;
   border-radius: 5px;
   font-family: Arial, sans-serif;
+  z-index: 7;
 }
 
 #fpsCanvas {
   margin-top: 5px;
   width: 150px;
   height: 75px;
+  z-index: 7;
 }
 
 #infoPanel, #fpsPanel, #axesIndicator {
   display: none; /* Hide by default */
-  z-index: 10;
+  z-index: 7;
 }
 
 #gravityWarning {
@@ -75,6 +80,7 @@ canvas {
     transform: scale(1); /* Taille initiale */
     opacity: 0; /* Opacité initiale */
     transition: transform 0.1s ease, opacity 0.1s ease; /* Transition fluide */
+    z-index: 5;
 }
 
 @keyframes blink {
@@ -93,7 +99,7 @@ canvas {
     border-radius: 5px;
     overflow: hidden;
     position: relative;
-    z-index: 1;
+    z-index: 10;
 }
 
 #healthBar {
@@ -103,6 +109,7 @@ canvas {
     transition: width 0.3s ease;
     position: absolute;
     left: 0;
+    z-index: 10;
 }
 
 #recentDamageBar {
@@ -113,6 +120,7 @@ canvas {
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 10;
 }
 
 #healthHeart {
@@ -121,7 +129,7 @@ canvas {
     left: 6.5%;
     width: 30px; /* Adjust size as needed */
     height: 30px; /* Adjust size as needed */
-    z-index: 2; /* Ensure it is above other elements */
+    z-index: 10; /* Ensure it is above other elements */
     filter: drop-shadow(0 0 5px rgba(0, 0, 0, 1)); /* Add a drop shadow */
 }
 
@@ -195,6 +203,7 @@ canvas {
   text-transform: uppercase; /* Texte en majuscules */
   margin-bottom: 20px; /* Espacement entre le message et le bouton */
   text-align: center;
+  z-index: 20;
 }
 
 #renderCanvas {
@@ -246,6 +255,6 @@ canvas {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: 15; /* Au-dessus de tout */
+    z-index: 2; /* Au-dessus de tout */
     pointer-events: none; /* Permet de cliquer à travers */
 }
