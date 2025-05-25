@@ -22,14 +22,16 @@ export class Bullet {
         if (data && data.velocity && data.velocity._x !== undefined) {
             this.velocity = new Vector3(data.velocity._x, data.velocity._y, data.velocity._z);
         } else {
+            // Augmente la vitesse initiale des bullets (facteur 2)
             this.velocity = data ? new Vector3(data.velocity.x, data.velocity.y, data.velocity.z) :
-                Vector3.TransformNormal(new Vector3(0, 0, 1), ship.getWorldMatrix()).normalize().scale(100);
+                Vector3.TransformNormal(new Vector3(0, 0, 1), ship.getWorldMatrix()).normalize().scale(200);
         }
 
         this.spawnTime = Date.now();
         this.lifeTime = 15000; // 15 seconds before removal
         this.visible = true;
-        this.hitbox = { radius: 0.2, length: 3 }; // Increase hitbox dimensions
+        // Augmente la taille de la hitbox pour faciliter les hits
+        this.hitbox = { radius: 0.5, length: 6 }; // hitbox plus grande
     }
 
     update(deltaTime) {

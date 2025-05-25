@@ -254,7 +254,8 @@ export class Game {
                         this.broadcast({
                             type: 'updateShipHealth',
                             id: ship.id,
-                            health: ship.health
+                            health: ship.health,
+                            lastHitBy: ship.lastHitBy // Ajout pour le feedback visuel côté client
                         });
                     }
                 }

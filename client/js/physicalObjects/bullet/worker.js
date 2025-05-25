@@ -14,7 +14,8 @@ self.onmessage = function(event) {
                 velocity: { ...data.velocity },
                 rotationQuaternion: { ...data.rotationQuaternion },
                 spawnTime: Date.now(),
-                lifeTime: 15000 // Default lifetime: 15 seconds
+                lifeTime: 15000, // Default lifetime: 15 seconds
+                visible: true // Ajout explicite de la propriété visible
             };
         }
     }
@@ -39,14 +40,6 @@ self.onmessage = function(event) {
     }
 };
 
-// Calculate update interval based on distance
-function calculateUpdateInterval(distance) {
-    if (distance <= 500) return 1000 / 60; // 60 FPS
-    if (distance <= 1000) return 1000 / 30; // 30 FPS
-    if (distance <= 2000) return 1000 / 15; // 15 FPS
-    return 1000 / 5; // 5 FPS for distant bullets
-}
-
 // Update bullet positions and handle expiration
 function updateBullets() {
     const currentTime = Date.now();
@@ -61,6 +54,7 @@ function updateBullets() {
 
         // Remove expired bullets
         if (currentTime - bullet.spawnTime > bullet.lifeTime) {
+            bullet.visible = false;
             delete self.bullets[bullet.id];
             return;
         }
@@ -73,12 +67,10 @@ function updateBullets() {
 
         // Remove bullets exceeding distance or coordinate limits
         if (distance >= 4000 || Math.abs(bullet.position.x) > 10000 || Math.abs(bullet.position.y) > 10000 || Math.abs(bullet.position.z) > 10000) {
+            bullet.visible = false;
             delete self.bullets[bullet.id];
             return;
         }
-
-        // Update bullet's update interval based on distance
-        bullet.updateInterval = calculateUpdateInterval(distance);
     });
 
     // Send updated bullet data to the main thread
@@ -88,10 +80,8 @@ function updateBullets() {
 // Start the continuous update loop
 function dynamicUpdate() {
     updateBullets();
-
-    // Determine the minimum update interval among all bullets
-    const minInterval = Math.min(...Object.values(self.bullets).map(bullet => bullet.updateInterval || 1000 / 60));
-    setTimeout(dynamicUpdate, minInterval || 1000); // Default to 100 FPS if no bullets
+    // Utilise un intervalle fixe de 60 FPS (16.67 ms)
+    setTimeout(dynamicUpdate, 1000 / 60);
 }
 
 dynamicUpdate();

@@ -7,9 +7,39 @@ export class Bullet {
         this.ship = ship;
         this.id = data ? data.id : `bullet-${Math.random().toString(36).substr(2, 9)}`;
 
-        // Play bullet sound
-        this.sound = new Sound("bulletSound", "../../sounds/laser1.mp3", this.scene, null, { volume: 0.5 });
-        this.sound.play();
+        const isLocal = ship && ship.isPlayer;
+        let soundReady = false;
+        this.sound = new Sound(
+            "bulletSound",
+            "/sounds/laser1.mp3",
+            this.scene,
+            () => {
+                soundReady = true;
+                // Augmente la vitesse de lecture et désactive l'atténuation spatiale
+                this.sound.setPlaybackRate(1.5);
+                this.sound.setVolume(5);
+                this.sound.spatialSound = false;
+                this.sound.play();
+            },
+            {
+                volume: 5,
+                spatialSound: false,
+                onerror: () => {}
+            }
+        );
+
+        if (this.sound.isReady()) {
+            soundReady = true;
+        }
+
+        setTimeout(() => {
+        }, 2000);
+
+        setTimeout(() => {
+        }, 10000);
+
+        this.sound.onended = () => {};
+        this.sound.onplay = () => {};
 
         // Create bullet mesh (visual representation)
         this.mesh = MeshBuilder.CreateTube('bullet', { path: [new Vector3(0, 0, 0), new Vector3(0, 0, 4)], radius: 0.1 }, this.scene);
@@ -44,8 +74,9 @@ export class Bullet {
         if (data && data.velocity && data.velocity._x !== undefined) {
             this.mesh.velocity = new Vector3(data.velocity._x, data.velocity._y, data.velocity._z);
         } else {
+            // Augmente la vitesse initiale des bullets (facteur 2)
             this.mesh.velocity = data ? new Vector3(data.velocity.x, data.velocity.y, data.velocity.z) :
-                Vector3.TransformNormal(new Vector3(0, 0, 1), ship.mesh.getWorldMatrix()).normalize().scale(100);
+                Vector3.TransformNormal(new Vector3(0, 0, 1), ship.mesh.getWorldMatrix()).normalize().scale(200);
         }
 
         // Send bullet data to the worker for management
@@ -68,11 +99,13 @@ export class Bullet {
     dispose() {
         if (this.mesh) {
             this.mesh.dispose();
-            if (this.sound) {
-                this.sound.dispose(); // Dispose of sound when bullet is removed
-            }
-            Bullet.worker.postMessage({ type: "removeBullet", data: { id: this.id } });
         }
+        if (this.sound) {
+            try {
+                this.sound.dispose();
+            } catch (e) {}
+        }
+        Bullet.worker.postMessage({ type: "removeBullet", data: { id: this.id } });
     }
 
     toJSON() {
@@ -96,19 +129,24 @@ if (typeof Bullet.worker === 'undefined') {
 
 Bullet.worker.onmessage = function (event) {
     if (event.data.type === "updateBullets") {
+        // Synchronise les bullets côté client avec celles du worker
+        const updatedIds = new Set();
         event.data.bullets.forEach(updatedBullet => {
+            updatedIds.add(updatedBullet.id);
             const projectile = game.projectiles[updatedBullet.id];
             if (projectile) {
                 const mesh = projectile.mesh;
                 mesh.position.set(updatedBullet.position.x, updatedBullet.position.y, updatedBullet.position.z);
-                mesh.isVisible = updatedBullet.visible; // Update visibility
+                // Correction : la visibilité doit être gérée ici
+                mesh.isVisible = updatedBullet.visible !== false;
+            }
+        });
 
-                // Remove bullets exceeding coordinate limits
-                const maxCoord = 10000;
-                if (Math.abs(updatedBullet.position.x) > maxCoord || Math.abs(updatedBullet.position.y) > maxCoord || Math.abs(updatedBullet.position.z) > maxCoord) {
-                    projectile.dispose();
-                    delete game.projectiles[updatedBullet.id];
-                }
+        // Supprime les bullets côté client qui n'existent plus côté worker
+        Object.keys(game.projectiles).forEach(id => {
+            if (!updatedIds.has(id)) {
+                game.projectiles[id].dispose();
+                delete game.projectiles[id];
             }
         });
     }

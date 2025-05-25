@@ -4,7 +4,10 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: black;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  letter-spacing: 0.04em;
+  color: #e0e6ed;
+  background: radial-gradient(ellipse at center, #1a1a2e 0%, #0f3460 100%);
 }
 
 canvas {
@@ -25,7 +28,11 @@ canvas {
   background-color: rgba(0, 0, 0, 0.5);
   padding: 10px;
   border-radius: 5px;
-  font-family: Arial, sans-serif;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  font-size: 18px;
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.4);
+  border: 1px solid #2d3a4a;
+  background: rgba(20, 30, 48, 0.85);
   z-index: 7;
 }
 
@@ -40,6 +47,11 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  font-size: 16px;
+  background: rgba(20, 30, 48, 0.85);
+  border: 1px solid #2d3a4a;
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.4);
   z-index: 7;
 }
 
@@ -47,11 +59,14 @@ canvas {
   position: absolute;
   bottom: 10px;
   left: 10px;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 10px 50px;
-  border-radius: 5px;
-  font-family: Arial, sans-serif;
+  color: #00fff7;
+  background: rgba(20, 30, 48, 0.85);
+  padding: 10px 32px;
+  border-radius: 12px;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  font-size: 18px;
+  border: none;
+  box-shadow: 0 2px 16px 0 rgba(0,255,247,0.15), 0 0 8px #00fff7;
   z-index: 7;
 }
 
@@ -60,11 +75,50 @@ canvas {
   width: 150px;
   height: 75px;
   z-index: 7;
+  border-radius: 8px;
+  background: #181c2f;
+  box-shadow: 0 0 8px #00fff7;
+  border: none;
 }
 
-#infoPanel, #fpsPanel, #axesIndicator {
-  display: none; /* Hide by default */
-  z-index: 7;
+/* --- RADAR --- */
+#radarContainer {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 220px;
+    height: 220px;
+    background: rgba(30, 40, 60, 0.7);
+    border-radius: 50%;
+    overflow: hidden;
+    z-index: 10;
+    box-shadow: 0 0 32px 8px #00fff7, 0 0 0 4px #232946 inset;
+    border: 2px solid #00fff7;
+    backdrop-filter: blur(2px) brightness(1.2);
+}
+
+#radarCanvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 60% 40%, #232946 60%, #181c2f 100%);
+    box-shadow: 0 0 32px 8px #00fff7 inset;
+    border: none;
+}
+
+/* --- Radar points and player indicator (drawn in JS, but style for reference) --- */
+/* You can use these colors in your JS drawing code: */
+.radar-ship-dot {
+    fill: #ff5555;
+    stroke: #fff;
+    stroke-width: 2px;
+    filter: drop-shadow(0 0 8px #ff5555);
+}
+.radar-player-dot {
+    fill: #00fff7;
+    stroke: #fff;
+    stroke-width: 2px;
+    filter: drop-shadow(0 0 8px #00fff7);
 }
 
 #gravityWarning {
@@ -81,6 +135,16 @@ canvas {
     opacity: 0; /* Opacité initiale */
     transition: transform 0.1s ease, opacity 0.1s ease; /* Transition fluide */
     z-index: 5;
+    font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+    font-size: 32px;
+    color: #ff5555;
+    text-align: center;
+    text-shadow: 0 0 16px #ff5555, 0 0 32px #fff;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @keyframes blink {
@@ -100,6 +164,9 @@ canvas {
     overflow: hidden;
     position: relative;
     z-index: 10;
+    font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+    font-size: 16px;
+    box-shadow: 0 2px 16px 0 rgba(0,0,0,0.4);
 }
 
 #healthBar {
@@ -133,23 +200,6 @@ canvas {
     filter: drop-shadow(0 0 5px rgba(0, 0, 0, 1)); /* Add a drop shadow */
 }
 
-#radarContainer {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 200px;
-    height: 200px;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    overflow: hidden;
-    z-index: 10;
-}
-
-#radarCanvas {
-    width: 100%;
-    height: 100%;
-}
-
 #killCount {
   position: absolute;
   bottom: 10px; /* Position en bas */
@@ -159,7 +209,14 @@ canvas {
   background-color: rgba(0, 0, 0, 0.5);
   padding: 10px;
   border-radius: 5px;
-  font-family: Arial, sans-serif;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  font-size: 28px;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 8px #00fff7, 0 0 16px #fff;
+  background: rgba(20, 30, 48, 0.85);
+  border: 1px solid #2d3a4a;
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.4);
   z-index: 10;
 }
 
@@ -175,6 +232,8 @@ canvas {
   justify-content: center;
   align-items: center;
   z-index: 20; /* Above everything else */
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  letter-spacing: 0.08em;
 }
 
 #playButton, #homeButton {
@@ -186,6 +245,11 @@ canvas {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.4);
+  text-shadow: 0 0 8px #fff;
 }
 
 #homeButton {
@@ -194,6 +258,7 @@ canvas {
 
 #playButton:hover {
   background-color: #0056b3;
+  text-shadow: 0 0 16px #00fff7;
 }
 
 #deathMessage {
@@ -204,6 +269,9 @@ canvas {
   margin-bottom: 20px; /* Espacement entre le message et le bouton */
   text-align: center;
   z-index: 20;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  text-shadow: 0 0 16px #ff5555, 0 0 32px #fff;
+  letter-spacing: 0.12em;
 }
 
 #renderCanvas {
@@ -218,13 +286,18 @@ canvas {
   margin-top: 20px;
   color: white;
   text-align: center;
-  font-family: Arial, sans-serif;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 8px #fff;
 }
 
 #controlsList h3 {
   margin-bottom: 10px;
-  font-size: 24px;
-  text-transform: uppercase;
+  font-size: 28px;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 8px #00fff7;
 }
 
 #controlsList ul {
@@ -234,7 +307,9 @@ canvas {
 
 #controlsList li {
   margin: 5px 0;
-  font-size: 18px;
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 4px #fff;
 }
 
 #gameTitle {
@@ -244,7 +319,13 @@ canvas {
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6);
   margin-bottom: 20px;
   text-align: center;
-  font-family: 'Arial', sans-serif;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #00fff7;
+  text-shadow: 0 0 24px #00fff7, 0 0 48px #fff;
+  margin-bottom: 32px;
 }
 
 #cockpitViewImage {

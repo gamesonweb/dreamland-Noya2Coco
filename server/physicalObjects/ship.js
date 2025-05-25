@@ -9,7 +9,7 @@ export class Ship {
         this.acceleration = new Vector3(0, 0, 0);
         this.lastTeleportTime = null;
         this.health = 30;
-        this.hitbox = { width: 3.5, height: 1.75, depth: 7 };
+        this.hitbox = { width: 5, height: 2.5, depth: 10 }; // hitbox plus grande
         this.kills = 0;
         this.token = token; // Store user token or email
     }

@@ -52,6 +52,10 @@ class SpaceBattleGame {
         this.radarContext = this.radarCanvas.getContext('2d');
         this.recentDamageTimeout = null;
 
+        // Ajout : musique de fond
+        this.backgroundMusic = null;
+        this.musicStarted = false;
+
         this.initializeStartScreen(); // Set up the start screen UI
         this.initializeSocket(); // Configure WebSocket event handlers
         this.updatePlayerActions(); // Start monitoring player actions
@@ -96,6 +100,7 @@ class SpaceBattleGame {
                 deathMessage.style.display = 'none'; // Hide death message
             }
             this.startGame(); // Start the game
+            this.startBackgroundMusic();
         });
 
         // Observe changes to the start screen's class to reset the health bar
@@ -189,7 +194,15 @@ class SpaceBattleGame {
                         this.handlePlayerDeath(); // Handle player death
                     }
                     if (ship.isPlayer) {
-                        this.updateHealthBar(ship); // Update health bar
+                        this.updateHealthBar(ship);
+                        // Ajout : alerte visuelle/sonore si on se fait toucher
+                        if (data.lastHitBy && data.id === this.playerShip.id) {
+                            this.showDamageAlert();
+                        }
+                    }
+                    // Ajout : effet visuel si on touche un ennemi
+                    if (this.playerShip && data.id !== this.playerShip.id && data.lastHitBy === this.playerShip.id) {
+                        this.showHitMarker();
                     }
                 }
             } else if (data.type === 'teleportShip') {
@@ -198,9 +211,15 @@ class SpaceBattleGame {
                     ship.update(data.ship, true); // Force update for teleportation
                 }
             } else if (data.type === 'newProjectile') {
+                // Correction : ne crée le bullet que si ce n'est PAS le joueur local qui l'a tiré
                 if (!this.projectiles[data.projectile.id]) {
-                    console.log('🚀 New projectile received:', data.projectile);
-                    this.projectiles[data.projectile.id] = new Bullet(this.scene, this.playerShip, data.projectile);
+                    const isLocalPlayerBullet = this.playerShip && data.projectile && data.projectile.shipId === this.playerShip.id;
+                    if (!isLocalPlayerBullet) {
+                        console.log('🚀 New projectile received:', data.projectile);
+                        this.projectiles[data.projectile.id] = new Bullet(this.scene, this.playerShip, data.projectile);
+                    } else {
+                        console.log(`[BULLET] Projectile ${data.projectile.id} ignoré côté client (déjà créé localement)`);
+                    }
                 }
             } else if (data.type === 'newShip') {
                 console.log('🚀 New ship received:', data.ship);
@@ -406,56 +425,97 @@ class SpaceBattleGame {
 
         ctx.clearRect(0, 0, this.radarCanvas.width, this.radarCanvas.height);
 
-        // Draw radar background
+        // --- Effet de grille radar ---
+        ctx.save();
+        ctx.globalAlpha = 0.25;
+        ctx.strokeStyle = "#00fff7";
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(radarRadius, radarRadius, radarRadius, 0, 2 * Math.PI);
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fill();
+        ctx.arc(radarRadius, radarRadius, radarRadius - 2, 0, 2 * Math.PI);
+        ctx.shadowColor = "#00fff7";
+        ctx.shadowBlur = 16;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
 
+        // Cercles concentriques
+        ctx.strokeStyle = "#00fff7";
+        ctx.lineWidth = 1;
+        for (let i = 1; i <= 3; i++) {
+            ctx.globalAlpha = 0.12;
+            ctx.beginPath();
+            ctx.arc(radarRadius, radarRadius, (radarRadius - 8) * (i / 3), 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+
+        // Lignes croisées
+        ctx.strokeStyle = "#00fff7";
+        ctx.globalAlpha = 0.10;
+        ctx.beginPath();
+        ctx.moveTo(radarRadius, 8);
+        ctx.lineTo(radarRadius, radarRadius * 2 - 8);
+        ctx.moveTo(8, radarRadius);
+        ctx.lineTo(radarRadius * 2 - 8, radarRadius);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+
+        // --- Affichage des autres vaisseaux ---
         // Transform player rotation into a matrix for local axes
         const rotationMatrix = new Matrix();
         playerRotation.toRotationMatrix(rotationMatrix);
 
-        // Draw other ships on the radar
         Object.values(this.ships).forEach(ship => {
             if (ship.id !== this.playerShip.id) {
                 const shipPos = ship.mesh.position;
                 const relativePos = shipPos.subtract(playerPos);
                 const localPos = Vector3.TransformCoordinates(relativePos, rotationMatrix.invert());
                 const maxRadarDistance = 500; // Maximum radar range
-                const scaleFactor = radarRadius / maxRadarDistance;
+                const scaleFactor = (radarRadius - 12) / maxRadarDistance;
 
                 let x = radarRadius + (localPos.x * scaleFactor);
                 let y = radarRadius - (localPos.y * scaleFactor);
 
                 const distance = Math.sqrt(localPos.x * localPos.x + localPos.y * localPos.y);
                 if (distance > maxRadarDistance) {
-                    x = radarRadius - (localPos.x / distance) * radarRadius;
-                    y = radarRadius - (localPos.y / distance) * radarRadius;
+                    x = radarRadius - (localPos.x / distance) * (radarRadius - 12);
+                    y = radarRadius - (localPos.y / distance) * (radarRadius - 12);
                 }
 
-                const forward = new Vector3(0, 0, 1); // Forward direction
-                const dotProduct = Vector3.Dot(localPos.clone().normalize(), forward);
-                const size = 5 * (1 + dotProduct); // Adjust size based on dot product
-
-                // Draw ship on radar
+                // Effet lumineux pour les vaisseaux ennemis
+                ctx.save();
                 ctx.beginPath();
-                ctx.arc(x, y, size, 0, 2 * Math.PI);
-                ctx.fillStyle = 'red';
+                ctx.arc(x, y, 8, 0, 2 * Math.PI);
+                ctx.shadowColor = "#ff5555";
+                ctx.shadowBlur = 16;
+                ctx.fillStyle = "#ff5555";
+                ctx.globalAlpha = 0.85;
                 ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.globalAlpha = 1;
+                ctx.strokeStyle = "#fff";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
             }
         });
 
-        // Draw player indicator at radar center
-        const crossSize = 6;
+        // --- Affichage du joueur au centre ---
+        ctx.save();
         ctx.beginPath();
-        ctx.strokeStyle = 'white';
-        ctx.lineWidth = 2;
-        ctx.moveTo(radarRadius - crossSize / 2, radarRadius);
-        ctx.lineTo(radarRadius + crossSize / 2, radarRadius);
-        ctx.moveTo(radarRadius, radarRadius - crossSize / 2);
-        ctx.lineTo(radarRadius, radarRadius + crossSize / 2);
+        ctx.arc(radarRadius, radarRadius, 10, 0, 2 * Math.PI);
+        ctx.shadowColor = "#00fff7";
+        ctx.shadowBlur = 18;
+        ctx.fillStyle = "#00fff7";
+        ctx.globalAlpha = 0.95;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 2.5;
         ctx.stroke();
+        ctx.restore();
 
         // Check proximity to planets and adjust gravity warning
         const gravityWarning = document.getElementById('gravityWarning');
@@ -522,6 +582,127 @@ class SpaceBattleGame {
             this.scene.debugLayer.show();
             radarContainer.style.display = 'none';
         }
+    }
+
+    // Ajout : méthode pour afficher un hit marker visuel amélioré + son
+    showHitMarker() {
+        let marker = document.getElementById('hitMarker');
+        if (!marker) {
+            marker = document.createElement('div');
+            marker.id = 'hitMarker';
+            marker.style.position = 'fixed';
+            marker.style.top = '50%';
+            marker.style.left = '50%';
+            marker.style.transform = 'translate(-50%, -50%) scale(1)';
+            marker.style.width = '220px'; // plus grand
+            marker.style.height = '220px';
+            marker.style.borderRadius = '50%';
+            marker.style.background = 'rgba(255,0,0,0.18)';
+            marker.style.border = '10px solid #fff';
+            marker.style.boxShadow = '0 0 120px 40px rgba(255,0,0,0.8), 0 0 0 32px rgba(255,255,255,0.4)';
+            marker.style.pointerEvents = 'none';
+            marker.style.zIndex = '9999';
+            marker.style.display = 'none';
+            marker.style.opacity = '0';
+            marker.style.transition = 'none';
+
+            // Ajoute l'animation CSS
+            const style = document.createElement('style');
+            style.id = 'hitMarkerStyle';
+            style.innerHTML = `
+                @keyframes hitMarkerFlash {
+                    0% {
+                        opacity: 1;
+                        transform: translate(-50%, -50%) scale(1.4);
+                        border-width: 18px;
+                        box-shadow: 0 0 180px 80px rgba(255,0,0,1), 0 0 0 48px rgba(255,255,255,0.7);
+                    }
+                    60% {
+                        opacity: 0.8;
+                        transform: translate(-50%, -50%) scale(1.0);
+                        border-width: 10px;
+                        box-shadow: 0 0 60px 20px rgba(255,0,0,0.5), 0 0 0 16px rgba(255,255,255,0.3);
+                    }
+                    100% {
+                        opacity: 0;
+                        transform: translate(-50%, -50%) scale(0.7);
+                        border-width: 0px;
+                        box-shadow: none;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+
+            document.body.appendChild(marker);
+        }
+        marker.style.display = 'block';
+        marker.style.opacity = '1';
+        marker.style.animation = 'hitMarkerFlash 0.55s cubic-bezier(0.4,0,0.2,1)';
+        marker.onanimationend = () => {
+            marker.style.display = 'none';
+            marker.style.animation = '';
+        };
+
+        // Joue un son de hit (création dynamique si besoin)
+        if (!this.hitSound) {
+            this.hitSound = new Audio('/sounds/hitmarker.mp3');
+            this.hitSound.volume = 0.7;
+        }
+        this.hitSound.currentTime = 0;
+        this.hitSound.play();
+    }
+
+    // Ajout : méthode pour afficher une alerte visuelle/sonore quand on se fait toucher
+    showDamageAlert() {
+        let alert = document.getElementById('damageAlert');
+        if (!alert) {
+            alert = document.createElement('div');
+            alert.id = 'damageAlert';
+            alert.style.position = 'fixed';
+            alert.style.top = '0';
+            alert.style.left = '0';
+            alert.style.width = '100vw';
+            alert.style.height = '100vh';
+            alert.style.background = 'rgba(255,0,0,0.18)';
+            alert.style.pointerEvents = 'none';
+            alert.style.zIndex = '9998';
+            alert.style.display = 'none';
+            alert.style.opacity = '0';
+            alert.style.transition = 'opacity 0.2s';
+            document.body.appendChild(alert);
+        }
+        alert.style.display = 'block';
+        alert.style.opacity = '1';
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => { alert.style.display = 'none'; }, 200);
+        }, 180);
+
+        // Joue un son d'alerte (création dynamique si besoin)
+        if (!this.damageSound) {
+            this.damageSound = new Audio('/sounds/damage_alert.mp3');
+            this.damageSound.volume = 0.7;
+        }
+        this.damageSound.currentTime = 0;
+        this.damageSound.play();
+    }
+
+    // Ajout : méthode pour lancer la musique de fond en boucle
+    startBackgroundMusic() {
+        if (this.musicStarted) return;
+        this.musicStarted = true;
+        if (!this.backgroundMusic) {
+            this.backgroundMusic = new Audio('/sounds/music.mp3'); // Mets ton fichier ici
+            this.backgroundMusic.loop = true;
+            this.backgroundMusic.volume = 0.5; // Ajuste le volume si besoin
+            this.backgroundMusic.addEventListener('ended', () => {
+                this.backgroundMusic.currentTime = 0;
+                this.backgroundMusic.play();
+            });
+        }
+        this.backgroundMusic.play().catch(e => {
+            console.warn('Impossible de jouer la musique de fond:', e);
+        });
     }
 }
 
